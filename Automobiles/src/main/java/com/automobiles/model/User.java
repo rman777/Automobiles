@@ -22,7 +22,16 @@ public class User {
 	private int roleid;
 	private int userstatus=1;
 
+	private Role role;
 	
+	public Role getRole() {
+		return role;
+	}
+
+	public void setRole(Role role) {
+		this.role = role;
+	}
+
 	public User() {}
 
 	public User(int userid, String userfirstname, String userlastname, String usermobile, String userpassword,
