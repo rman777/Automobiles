@@ -25,25 +25,6 @@ public class ExcelData {
 		this.partqty = partqty;
 	}
 
-
-
-	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	public int getPartid() {
 		return partid;
 	}

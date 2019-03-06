@@ -18,8 +18,6 @@ public class Role {
 	
 	public Role() {}
 	
-	
-	
 	public Role(int roleid, String rolename, int roleflag) {
 		super();
 		this.roleid = roleid;

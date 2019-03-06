@@ -1,8 +1,6 @@
 package com.automobiles.controller;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.automobiles.constant.Constant;
 import com.automobiles.customexception.CustomException;
 import com.automobiles.model.ExcelData;
 import com.automobiles.model.Role;
@@ -37,8 +36,6 @@ import com.automobiles.repository.UserJpaRepository;
 @CrossOrigin("*")
 @RestController
 public class UserController {
-
-	
 	
 	@Autowired
 	PasswordEncoder passwordEncoder;
@@ -52,26 +49,18 @@ public class UserController {
 	@Autowired
 	ExcelJpaRepository excelJpaRepository;
 	
-
-	
-	Date date=new Date();
-	SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	String formattedDate = formatter.format(date);
-
-	
 	// Save Register User Data
 	@PostMapping("/register")
 	public ResponseEntity<Object> saveUserData(@RequestBody User user) {
 		if(userJpaRepository.findByUsermobile(user.getUsermobile()).isPresent()) {
-			 return new ResponseEntity<Object>(new CustomException("User Already Exists"), HttpStatus.OK);
+			 return new ResponseEntity<Object>(new CustomException(Constant.FAIL,Constant.USER_ALREADY_EXIST), HttpStatus.OK);
 		}else {
-			user.setUserpassword(passwordEncoder.encode(user.getUserpassword()));
-			user.setUsercreated(formattedDate);
-			user.setUserlastlogin(formattedDate);
+			 user.setUserpassword(passwordEncoder.encode(user.getUserpassword()));
+			 user.setUsercreated(Constant.DATETIME);
+			 user.setUserlastlogin(Constant.DATETIME);
 			 userJpaRepository.save(user);
-			 return new ResponseEntity<Object>(new CustomException("User Registered Successfully"), HttpStatus.OK);
+			 return new ResponseEntity<Object>(new CustomException(Constant.SUCCESS,Constant.USER_REGISTER_SUCCESS), HttpStatus.OK);
 		}
-		
 	}
 	
 	// Get All User List Data
@@ -85,7 +74,6 @@ public class UserController {
 	}
 	
 	
-	
 	// Get Single User Data by Id
 	@GetMapping("/getUser/{userid}")
 	public ResponseEntity<?> getUserData(@PathVariable int userid) {
@@ -94,8 +82,8 @@ public class UserController {
         	User result = user.get();
         	  return new ResponseEntity<User>(result,HttpStatus.OK);  
         }
-        return new ResponseEntity<Object>(new CustomException("User with id " + userid 
-                + " not found"), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<Object>(new CustomException(Constant.FAIL,"User with id " + userid 
+                + " not found"), HttpStatus.OK);
 	}
 	
 	// Delete User Data by Id
@@ -106,7 +94,7 @@ public class UserController {
 	        	userJpaRepository.deleteById(userid);
 	        	  return new ResponseEntity<User>(HttpStatus.OK);  
 	        }
-	        return new ResponseEntity<Object>(new CustomException("User with id " + userid 
+	        return new ResponseEntity<Object>(new CustomException(Constant.FAIL,"User with id " + userid 
 	                + " not found"), HttpStatus.OK);
 	}
 	
@@ -119,17 +107,14 @@ public class UserController {
 		if(finduser.isPresent()) {
 			User check = finduser.get();
 			if(passwordEncoder.matches(userpassword, check.getUserpassword())) {
-				/*
-				 * user.setUserid(user.getUserid()); 
-				 * user.setUserlastlogin(formattedDate);
-				 * userJpaRepository.save(user);
-				 */
-				 return new ResponseEntity<Object>(new CustomException("User login Successfully"), HttpStatus.OK); 
+				check.setUserlastlogin(Constant.DATETIME);
+				  userJpaRepository.save(check); // This is for Update Last Login Column from User Table.
+				 return new ResponseEntity<Object>(new CustomException(Constant.SUCCESS,Constant.USER_LOGIN_SUCCESS), HttpStatus.OK); 
 			}else {
-				return new ResponseEntity<Object>(new CustomException("Invalid username or password"), HttpStatus.OK);
+				return new ResponseEntity<Object>(new CustomException(Constant.FAIL,Constant.USER_LOGIN_FAIL), HttpStatus.OK);
 			}	   
 		}else {
-			 return new ResponseEntity<Object>(new CustomException("Invalid username or password"), HttpStatus.OK);  
+			 return new ResponseEntity<Object>(new CustomException(Constant.FAIL,Constant.USER_LOGIN_FAIL), HttpStatus.OK);  
 		}
 	}
 	
@@ -142,10 +127,10 @@ public class UserController {
 			User result = optionalUser.get();
 			result.setUserpassword(passwordEncoder.encode(user.getUserpassword()));
 			userJpaRepository.save(result);
-			return new ResponseEntity<Object>(new CustomException("User password changed Successfully"), HttpStatus.OK); 
+			return new ResponseEntity<Object>(new CustomException(Constant.SUCCESS,Constant.PASSWORD_CHANGE_SUCCESS), HttpStatus.OK); 
 			
 		}else {
-			return new ResponseEntity<Object>(new CustomException("Failed to change password"), HttpStatus.OK); 
+			return new ResponseEntity<Object>(new CustomException(Constant.FAIL,Constant.PASSWORD_CHANGE_FAIL), HttpStatus.OK); 
 		}
 		
 	}
@@ -166,10 +151,8 @@ public class UserController {
 	        }
 	         
 	    }
-	    return new ResponseEntity<Object>(new CustomException("Excel Data Uploaded Successfully"), HttpStatus.OK);
-	    
+	    return new ResponseEntity<Object>(new CustomException(Constant.SUCCESS,Constant.EXCEL_READ_DATA_SUCCESS), HttpStatus.OK);
 	}
-	
 	
 	
 	// Get All User Role List Data
@@ -181,7 +164,6 @@ public class UserController {
         }
         return new ResponseEntity<List<Role>>(role, HttpStatus.OK);
 	}
-	
 	
 	
 	
